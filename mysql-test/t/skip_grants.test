@@ -1,0 +1,29 @@
+--disable_warnings
+drop table if exists t1,v1;
+drop view if exists t1,v1;
+drop procedure if exists f1;
+--enable_warnings
+use test;
+
+#
+# test that we can create VIEW if privileges check switched off
+#
+create table t1 (field1 INT);
+-- error ER_MALFORMED_DEFINER
+CREATE VIEW v1 AS SELECT field1 FROM t1;
+drop table t1;
+
+#
+# Test that we can create and drop procedure without warnings
+# see bug#9993
+#
+create procedure f1() select 1;
+drop procedure f1;
+
+#
+# BUG#13504: creation view with DEFINER clause if --skip-grant-tables
+#
+create table t1 (a int);
+create definer='user'@'host' sql security definer view v1 as select * from t1;
+drop view v1;
+drop table t1;
